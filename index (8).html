@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Помогу собрать ПК</title>
+<style>
+:root{--bg:#0f1220;--card:#1a1f35;--card2:#222845;--txt:#e8ebf5;--mut:#9aa3c0;--acc:#4f8cff;--good:#3ecf7a;--warn:#ffb44f;--bad:#ff5f6d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}
+header{background:linear-gradient(135deg,#1a2050,#3a1a60);padding:34px 20px;text-align:center}
+header h1{font-size:2em;margin-bottom:6px}
+header p{color:var(--mut)}
+nav{position:sticky;top:0;background:#141830ee;backdrop-filter:blur(6px);z-index:10;padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;border-bottom:1px solid #2a3060}
+nav a{color:var(--mut);text-decoration:none;padding:5px 10px;border-radius:8px;font-size:.85em;white-space:nowrap}
+nav a:hover{background:var(--card2);color:var(--txt)}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+section{margin:34px 0}
+h2{font-size:1.5em;margin-bottom:12px;border-left:4px solid var(--acc);padding-left:12px}
+h3{margin:16px 0 8px;color:var(--acc)}
+.card{background:var(--card);border-radius:14px;padding:18px 20px;margin:12px 0}
+select,input[type=number]{background:var(--card2);color:var(--txt);border:1px solid #3a4070;border-radius:8px;padding:9px 10px;font-size:1em;width:100%}
+label{display:block;color:var(--mut);font-size:.85em;margin:10px 0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1em;cursor:pointer;margin-top:14px}
+button:hover{filter:brightness(1.15)}
+table{width:100%;border-collapse:collapse;font-size:.9em;margin-top:10px}
+th,td{padding:7px 8px;border-bottom:1px solid #2a3060;text-align:left}
+th{color:var(--mut);cursor:pointer;user-select:none}
+tr:hover td{background:#22284566}
+.rec{background:#1d3a2a;border:1px solid var(--good);border-radius:10px;padding:10px 14px;margin:6px 0}
+.fpsrow{display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;margin:5px 0;background:var(--card2)}
+.fpsrow.best{background:#1d3a2a;border:1px solid var(--good)}
+.tag{font-size:.75em;color:var(--good);margin-left:8px}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:10px;background:#3a2a10;border:1px solid var(--warn)}
+details{background:var(--card2);border-radius:10px;padding:10px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:7px 0;color:var(--txt)}
+.badge{display:inline-block;background:var(--card2);border:1px solid #3a4070;border-radius:20px;padding:2px 12px;font-size:.8em;color:var(--mut);margin:3px 4px 3px 0}
+footer{background:#0a0d18;padding:26px 16px;text-align:center;color:var(--mut);font-size:.85em}
+.big{font-size:1.6em;font-weight:700;color:var(--good)}
+.price{color:var(--warn)}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#3a4070;border-radius:5px}
+@media(max-width:640px){header h1{font-size:1.4em}nav{overflow-x:auto;justify-content:flex-start;flex-wrap:nowrap}}
+</style>
+</head>
+<body>
+<header>
+<h1>🖥️ Помогу собрать ПК</h1>
+<p>Калькулятор FPS, базы железа, готовые сборки и советы — всё в одном месте</p>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<section id="calc">
+<h2>Калькулятор FPS</h2>
+<div class="card">
+<div class="grid">
+<div><label>Видеокарта</label><select id="gpu"></select></div>
+<div><label>Процессор</label><select id="cpu"></select></div>
+<div><label>Оперативная память</label><select id="ram"></select></div>
+<div><label>Разрешение</label><select id="res"></select></div>
+</div>
+</div>
+<div class="card" id="hwcard"><b>Ваше железо:</b> <span id="hwinfo">—</span><div class="verdict" id="verdict" style="display:none"></div></div>
+<div id="games"></div>
+</section>
+
+<section id="gpu-db">
+<h2>База видеокарт</h2>
+<div class="card"><label>Поиск</label><input id="gpuq" placeholder="например, 4060 или RX 5700"><div style="overflow-x:auto"><table id="gput"></table></div></div>
+</section>
+
+<section id="cpu-db">
+<h2>База процессоров</h2>
+<div class="card"><label>Поиск</label><input id="cpuq" placeholder="например, Ryzen 5 5600"><div style="overflow-x:auto"><table id="cput"></table></div></div>
+</section>
+
+<section id="ram">
+<h2>Память (ОЗУ)</h2>
+<div class="card">
+<h3>Сколько нужно в 2026 году</h3>
+<p><b>16 ГБ</b> — минимум для игр. <b>32 ГБ</b> — комфорт: стримы, браузер с сотней вкладок, тяжёлые игры. <b>64 ГБ</b> — работа с монтажом, 3D и виртуалками.</p>
+<h3>DDR4 или DDR5</h3>
+<p>DDR5 быстрее на 5–15% в играх и даёт запас на будущее, но платы на AM5 и LGA1851 дороже. DDR4 — способ сэкономить на сборке с Ryzen 5000 или Intel 12–14 поколения.</p>
+<h3>Частота и тайминги</h3>
+<p>Для DDR5 берите 6000 МГц CL30 (идеал для Ryzen 7000/9000). Для DDR4 — 3200–3600 МГц CL16. Двухканал (2 планки) обязателен: одна планка режет FPS до 20%.</p>
+</div>
+</section>
+
+<section id="storage">
+<h2>Накопители</h2>
+<div class="card">
+<h3>NVMe SSD (M.2)</h3><p>Главный диск под систему и игры. Скорость 3000–7000 МБ/с. Обязательно с DRAM-кэшем для стабильной работы: Samsung 980 Pro, WD SN850X, Kingston KC3000.</p>
+<h3>SATA SSD</h3><p>550 МБ/с — для старых ПК без слота M.2. Всё равно в разы быстрее HDD.</p>
+<h3>HDD</h3><p>Только как архив: фильмы, бэкапы, редко запускаемые игры. 5400/7200 об/мин, избегайте SMR-моделей.</p>
+<p><b>Совет:</b> минимальный комфортный набор — NVMe 1 ТБ под систему и игры + при желании HDD 2–4 ТБ под архив.</p>
+</div>
+</section>
+
+<section id="psu">
+<h2>Блок питания</h2>
+<div class="card">
+<div class="grid">
+<div><label>Видеокарта</label><select id="pgpu"></select></div>
+<div><label>Процессор</label><select id="pcpu"></select></div>
+</div>
+<button onclick="calcPsu()">Рассчитать</button>
+<div id="psures" style="margin-top:14px"></div>
+</div>
+</section>
+
+<section id="mb">
+<h2>Материнские платы</h2>
+<div class="card">
+<h3>Сокеты 2026 года</h3>
+<p><b>AM5</b> — все Ryzen 7000/9000, живёт до 2027+. <b>LGA1851</b> — Core Ultra 200. <b>LGA1700</b> — Intel 12–14 поколения (бюджетный вариант). <b>AM4</b> — ещё актуален для Ryzen 5000, отличная цена.</p>
+<h3>Чипсеты</h3>
+<p><b>A520/A620</b> — минимум, без разгона. <b>B550/B650</b> — золотая середина для большинства. <b>X570/X670/X870</b> — больше линий PCIe и слотов.</p>
+<h3>Проверьте перед покупкой</h3>
+<p>Поддержка процессора (обновление BIOS), радиаторы на цепи питания для мощных CPU, наличие M.2-слотов под ваши накопители, Wi-Fi/Bluetooth если нужны.</p>
+</div>
+</section>
+
+<section id="cooling">
+<h2>Охлаждение</h2>
+<div class="card">
+<h3>Под уровень процессора</h3>
+<p><b>До 65 Вт</b> (i3, Ryzen 5 не-X): башня за 1500–2500 ₽ (ID-Cooling SE-214). <b>65–150 Вт</b> (Ryzen 7, i5-K): Deepcool AK400/Pa120. <b>150–250 Вт</b> (i7/i9-K, Ryzen 9): башня с двойными башнями или СЖО 240–360 мм.</p>
+<h3>Вентиляторы корпуса</h3>
+<p>Минимум 2: один вдув спереди снизу, один выдув сзади сверху. Комфорт — 3: два на вдув спереди, один на выдув.</p>
+<h3>Термопаста</h3><p>Любая брендовая (Arctic MX-4, ID-Cooling). Менять раз в 2–3 года.</p>
+</div>
+</section>
+
+<section id="case">
+<h2>Корпус и вентиляция</h2>
+<div class="card">
+<p><b>Проверяйте размеры:</b> видеокарта длиной до 330+ мм и высота башни кулера до 160 мм — смотрите ограничения корпуса. Стандартный Mid-Tower подойдёт почти всем.</p>
+<p><b>Airflow:</b> сетка спереди важнее стекла. Mesh-фасад + 2–3 вентилятора = температуры на 5–10 °C ниже, чем в глухом корпусе.</p>
+<p><b>Рекомендуемые бренды:</b> Deepcool, Zalman, Cougar, Aerocool — от 2500 ₽ с нормальным воздушным потоком. Пыльник на фронтальном вдуве — мастхэв.</p>
+</div>
+</section>
+
+<section id="monitors">
+<h2>Мониторы</h2>
+<div class="card">
+<div style="overflow-x:auto"><table>
+<tr><th>Видеокарта</th><th>Комфортное разрешение</th><th>Герцовка</th></tr>
+<tr><td>GTX 1650 … RX 6600</td><td>1080p</td><td>60–144 Гц</td></tr>
+<tr><td>RTX 3060 … RTX 4060 Ti / RX 7600 XT</td><td>1080p–1440p</td><td>144–165 Гц</td></tr>
+<tr><td>RTX 4070 … RX 7800 XT</td><td>1440p</td><td>144–180 Гц</td></tr>
+<tr><td>RTX 4080 / 5080 / RX 7900 XT</td><td>1440p–4K</td><td>144 Гц+</td></tr>
+<tr><td>RTX 4090 / 5090</td><td>4K</td><td>144–240 Гц</td></tr>
+</table></div>
+<p style="margin-top:10px"><b>Совет:</b> IPS-матрица, 27" для 1440p, 32" для 4K. Адаптивная синхронизация (FreeSync/G-Sync) — обязательно.</p>
+</div>
+</section>
+
+<section id="builds">
+<h2>Готовые сборки</h2>
+<div id="buildlist"></div>
+</section>
+
+<section id="tips">
+<h2>Советы по сборке</h2>
+<div class="card">
+<div class="chk"><input type="checkbox" id="t1"><label for="t1" style="margin:0">Подготовьте поверхность: собирайте на столе, не на ковре, снимите статику (коснитесь батареи).</label></div>
+<div class="chk"><input type="checkbox" id="t2"><label for="t2" style="margin:0">Установите процессор в сокет: совпадите треугольник-метки, ножку-рычаг опустите до щелчка.</label></div>
+<div class="chk"><input type="checkbox" id="t3"><label for="t3" style="margin:0">Память: планки в 2-й и 4-й слот (для двухканала), до щелчка с обеих сторон.</label></div>
+<div class="chk"><input type="checkbox" id="t4"><label for="t4" style="margin:0">M.2 SSD: вставьте под углом 30°, прижмите, зафиксируйте винтом или защёлкой.</label></div>
+<div class="chk"><input type="checkbox" id="t5"><label for="t5" style="margin:0">Кулер: каплю пасты размером с горошину в центр CPU, аккуратно прижать.</label></div>
+<div class="chk"><input type="checkbox" id="t6"><label for="t6" style="margin:0">Плата в корпус: установите заглушки I/O, прикрутите стойки под размер платы.</label></div>
+<div class="chk"><input type="checkbox" id="t7"><label for="t7" style="margin:0">БП: прикрутите, проведите кабели 24-pin и 8-pin CPU (не перепутайте с PCIe!).</label></div>
+<div class="chk"><input type="checkbox" id="t8"><label for="t8" style="margin:0">Видеокарта: в верхний слот x16, до щелчка, дополнительное питание 8/16-pin обязательно.</label></div>
+<div class="chk"><input type="checkbox" id="t9"><label for="t9" style="margin:0">Переднее подключение: USB, аудио (HD Audio), кнопки Power/Reset по инструкции платы.</label></div>
+<div class="chk"><input type="checkbox" id="t10"><label for="t10" style="margin:0">Первый запуск: проверьте, что монитор подключён к видеокарте, подключите монитор в видеокарту, а не в материнку!</label></div>
+<h3>Типичные ошибки</h3>
+<p>Забыли питание PCIe у видеокарты; монитор воткнут в материнку вместо видеокарты; планка ОЗУ не до конца вставлена; кулер перекрывает первый слот ОЗУ; кабели 8-pin CPU и PCIe внешне похожи — проверяйте маркировку.</p>
+</div>
+</section>
+
+<section id="faq">
+<h2>FAQ — частые вопросы</h2>
+<div class="card">
+<details><summary>Сколько нужно ОЗУ для игр?</summary><p>16 ГБ — рабочий минимум, 32 ГБ — комфорт на годы вперёд. 8 ГБ в 2026-м уже впритык.</p></details>
+<details><summary>Ryzen или Intel — что лучше?</summary><p>Для игр топом остаются Ryzen с X3D-кэшем (7800X3D, 9800X3D). В среднем сегменте оба хороши: i5-13400F против Ryzen 5 5600/7600 — разница минимальна.</p></details>
+<details><summary>Нужна ли мне видеокарта, если есть встроенная графика?</summary><p>Для офиса и кино — нет. Для игр в 1080p на средних — уже нужна дискретная карта уровня GTX 1650 и выше.</p></details>
+<details><summary>Можно ли взять б/у видеокарту?</summary><p>Можно, но с осторожностью: проверьте на месте (бенчмарки 10–15 минут), уточните, не майнилась ли. Избегайте карт после майнинга без гарантии.</p></details>
+<details><summary>Что важнее для игр — процессор или видеокарта?</summary><p>В 1080p на низких настройках — процессор, в 1440p–4K — видеокарта. Для большинства случаев видеокарта важнее в 2–3 раза по влиянию на FPS.</p></details>
+<details><summary>Нужен ли жидкостный кулер?</summary><p>Только для процессоров от 200 Вт и сверху. Хорошая воздушная башня за 4000 ₽ охлаждает не хуже СЖО за 8000 ₽.</p></details>
+<details><summary>Поможет ли больше ОЗУ для FPS?</summary><p>После 16 ГБ — почти нет. Влияет частота и двухканал, а не объём.</p></details>
+<details><summary>Стоит ли гнать процессор?</summary><p>На Ryzen 5000 и Intel K-серии — да, даёт 5–10%. На новых поколениях разгон по камню почти не даёт прироста — лучше поднять частоту памяти.</p></details>
+</div>
+</section>
+
+<section id="glossary">
+<h2>Глоссарий</h2>
+<div class="card">
+<p><span class="badge">FPS</span> кадров в секунду — плавность картинки. 60 — комфорт, 100+ — для шутеров.</p>
+<p><span class="badge">VRAM</span> видеопамять — чем больше, тем выше можно выставить текстуры и разрешение.</p>
+<p><span class="badge">TDP</span> тепловыделение — по нему подбирают кулер и БП.</p>
+<p><span class="badge">Сокет</span> тип разъёма процессора — должен совпадать у CPU и материнской платы.</p>
+<p><span class="badge">Двухканал</span> режим, когда две планки работают параллельно и дают до +25% FPS.</p>
+<p><span class="badge">RT</span> трассировка лучей — реалистичное освещение, тяжёлое для видеокарты.</p>
+<p><span class="badge">DLSS / FSR</span> апскейлинг — повышение FPS с минимальной потерей качества. Включайте в тяжёлых играх.</p>
+<p><span class="badge">BIOS</span> базовая прошивка материнской платы — может потребовать обновления для новых CPU.</p>
+<p><span class="badge">NVMe</span> быстрый SSD в слоте M.2 — стандарт для современных сборок.</p>
+<p><span class="badge">Airflow</span> продув корпуса — поток воздуха от входа к выходу, снижает температуры.</p>
+</div>
+</section>
+
+</main>
+<footer>Помогу собрать ПК · калькулятор и советы · 2026<br>Цены ориентировочные, проверяйте перед покупкой</footer>
+<script>
+const GPUS = [{"name": "GT 710", "vram": "1", "tdp": 19.0, "price": 1500, "perf": 1.0, "year": 2014}, {"name": "GT 730", "vram": "2", "tdp": 25.0, "price": 2000, "perf": 1.5, "year": 2014}, {"name": "GTX 750 Ti", "vram": "2", "tdp": 60.0, "price": 3500, "perf": 8.0, "year": 2014}, {"name": "GT 1030", "vram": "2", "tdp": 30.0, "price": 4500, "perf": 5.0, "year": 2017}, {"name": "GTX 950", "vram": "2", "tdp": 90.0, "price": 4500, "perf": 11.0, "year": 2015}, {"name": "GTX 960", "vram": "4", "tdp": 120.0, "price": 5500, "perf": 13.0, "year": 2015}, {"name": "GTX 1050", "vram": "2", "tdp": 75.0, "price": 6000, "perf": 10.0, "year": 2016}, {"name": "GTX 1050 Ti", "vram": "4", "tdp": 75.0, "price": 7500, "perf": 12.0, "year": 2016}, {"name": "GTX 1060 3GB", "vram": "3", "tdp": 120.0, "price": 6500, "perf": 15.0, "year": 2016}, {"name": "GTX 1060 6GB", "vram": "6", "tdp": 120.0, "price": 8500, "perf": 18.0, "year": 2016}, {"name": "GTX 970", "vram": "4", "tdp": 145.0, "price": 7000, "perf": 17.0, "year": 2014}, {"name": "GTX 980", "vram": "4", "tdp": 165.0, "price": 8500, "perf": 20.0, "year": 2014}, {"name": "GTX 1070", "vram": "8", "tdp": 150.0, "price": 11000, "perf": 23.0, "year": 2016}, {"name": "GTX 1070 Ti", "vram": "8", "tdp": 180.0, "price": 13000, "perf": 26.0, "year": 2017}, {"name": "GTX 1080", "vram": "8", "tdp": 180.0, "price": 15000, "perf": 28.0, "year": 2016}, {"name": "GTX 980 Ti", "vram": "6", "tdp": 250.0, "price": 11000, "perf": 26.0, "year": 2015}, {"name": "GTX 1080 Ti", "vram": "11", "tdp": 250.0, "price": 20000, "perf": 34.0, "year": 2017}, {"name": "GTX 1630", "vram": "4", "tdp": 75.0, "price": 7000, "perf": 11.0, "year": 2022}, {"name": "GTX 1650", "vram": "4", "tdp": 75.0, "price": 8000, "perf": 13.0, "year": 2019}, {"name": "GTX 1650 Super", "vram": "4", "tdp": 100.0, "price": 10000, "perf": 17.0, "year": 2019}, {"name": "GTX 1660", "vram": "6", "tdp": 120.0, "price": 10000, "perf": 18.0, "year": 2019}, {"name": "GTX 1660 Super", "vram": "6", "tdp": 125.0, "price": 12000, "perf": 20.0, "year": 2019}, {"name": "GTX 1660 Ti", "vram": "6", "tdp": 120.0, "price": 13000, "perf": 21.0, "year": 2019}, {"name": "RTX 2060", "vram": "6", "tdp": 160.0, "price": 14000, "perf": 27.0, "year": 2019}, {"name": "RTX 2060 Super", "vram": "8", "tdp": 175.0, "price": 17000, "perf": 31.0, "year": 2019}, {"name": "RTX 2070", "vram": "8", "tdp": 175.0, "price": 18000, "perf": 32.0, "year": 2018}, {"name": "RTX 2070 Super", "vram": "8", "tdp": 215.0, "price": 20000, "perf": 35.0, "year": 2019}, {"name": "RTX 2080", "vram": "8", "tdp": 215.0, "price": 23000, "perf": 38.0, "year": 2018}, {"name": "RTX 2080 Super", "vram": "8", "tdp": 250.0, "price": 25000, "perf": 41.0, "year": 2019}, {"name": "RTX 2080 Ti", "vram": "11", "tdp": 250.0, "price": 30000, "perf": 45.0, "year": 2018}, {"name": "RTX 3050", "vram": "8", "tdp": 130.0, "price": 13000, "perf": 21.0, "year": 2022}, {"name": "RTX 3060", "vram": "12", "tdp": 170.0, "price": 18000, "perf": 27.0, "year": 2021}, {"name": "RTX 3060 Ti", "vram": "8", "tdp": 200.0, "price": 23000, "perf": 35.0, "year": 2020}, {"name": "RTX 3070", "vram": "8", "tdp": 220.0, "price": 28000, "perf": 41.0, "year": 2020}, {"name": "RTX 3070 Ti", "vram": "8", "tdp": 290.0, "price": 32000, "perf": 45.0, "year": 2021}, {"name": "RTX 3080", "vram": "10", "tdp": 320.0, "price": 42000, "perf": 53.0, "year": 2020}, {"name": "RTX 3080 Ti", "vram": "12", "tdp": 350.0, "price": 55000, "perf": 58.0, "year": 2021}, {"name": "RTX 3090", "vram": "24", "tdp": 350.0, "price": 60000, "perf": 59.0, "year": 2020}, {"name": "RTX 3090 Ti", "vram": "24", "tdp": 450.0, "price": 70000, "perf": 64.0, "year": 2022}, {"name": "RTX 4060", "vram": "8", "tdp": 115.0, "price": 22000, "perf": 36.0, "year": 2023}, {"name": "RTX 4060 Ti 8GB", "vram": "8", "tdp": 160.0, "price": 28000, "perf": 45.0, "year": 2023}, {"name": "RTX 4060 Ti 16GB", "vram": "16", "tdp": 165.0, "price": 35000, "perf": 46.0, "year": 2023}, {"name": "RTX 4070", "vram": "12", "tdp": 200.0, "price": 45000, "perf": 55.0, "year": 2023}, {"name": "RTX 4070 Super", "vram": "12", "tdp": 220.0, "price": 52000, "perf": 62.0, "year": 2024}, {"name": "RTX 4070 Ti", "vram": "12", "tdp": 285.0, "price": 60000, "perf": 70.0, "year": 2023}, {"name": "RTX 4070 Ti Super", "vram": "16", "tdp": 285.0, "price": 70000, "perf": 75.0, "year": 2024}, {"name": "RTX 4080", "vram": "16", "tdp": 320.0, "price": 85000, "perf": 84.0, "year": 2022}, {"name": "RTX 4080 Super", "vram": "16", "tdp": 320.0, "price": 90000, "perf": 88.0, "year": 2024}, {"name": "RTX 4090", "vram": "24", "tdp": 450.0, "price": 150000, "perf": 105.0, "year": 2022}, {"name": "RTX 5060", "vram": "8", "tdp": 145.0, "price": 25000, "perf": 44.0, "year": 2025}, {"name": "RTX 5060 Ti 8GB", "vram": "8", "tdp": 180.0, "price": 30000, "perf": 52.0, "year": 2025}, {"name": "RTX 5060 Ti 16GB", "vram": "16", "tdp": 180.0, "price": 37000, "perf": 53.0, "year": 2025}, {"name": "RTX 5070", "vram": "12", "tdp": 250.0, "price": 45000, "perf": 66.0, "year": 2025}, {"name": "RTX 5070 Ti", "vram": "16", "tdp": 300.0, "price": 65000, "perf": 80.0, "year": 2025}, {"name": "RTX 5080", "vram": "16", "tdp": 360.0, "price": 90000, "perf": 92.0, "year": 2025}, {"name": "RTX 5090", "vram": "32", "tdp": 575.0, "price": 200000, "perf": 125.0, "year": 2025}, {"name": "RX 460", "vram": "4", "tdp": 75.0, "price": 5000, "perf": 8.0, "year": 2016}, {"name": "RX 470", "vram": "4", "tdp": 120.0, "price": 6000, "perf": 14.0, "year": 2016}, {"name": "RX 480", "vram": "8", "tdp": 150.0, "price": 7500, "perf": 17.0, "year": 2016}, {"name": "RX 550", "vram": "4", "tdp": 50.0, "price": 4000, "perf": 5.0, "year": 2017}, {"name": "RX 560", "vram": "4", "tdp": 80.0, "price": 5500, "perf": 9.0, "year": 2017}, {"name": "RX 570", "vram": "4", "tdp": 150.0, "price": 6500, "perf": 15.0, "year": 2017}, {"name": "RX 570 8GB", "vram": "8", "tdp": 150.0, "price": 7500, "perf": 17.0, "year": 2017}, {"name": "RX 580", "vram": "8", "tdp": 185.0, "price": 9000, "perf": 19.0, "year": 2017}, {"name": "RX 590", "vram": "8", "tdp": 175.0, "price": 10000, "perf": 21.0, "year": 2018}, {"name": "RX 5500 XT 4GB", "vram": "4", "tdp": 130.0, "price": 9000, "perf": 18.0, "year": 2019}, {"name": "RX 5500 XT 8GB", "vram": "8", "tdp": 130.0, "price": 11000, "perf": 19.0, "year": 2019}, {"name": "RX 5600 XT", "vram": "6", "tdp": 150.0, "price": 13000, "perf": 24.0, "year": 2020}, {"name": "RX 5700", "vram": "8", "tdp": 185.0, "price": 15000, "perf": 28.0, "year": 2019}, {"name": "RX 5700 XT", "vram": "8", "tdp": 225.0, "price": 19000, "perf": 33.0, "year": 2019}, {"name": "RX 6400", "vram": "4", "tdp": 53.0, "price": 9000, "perf": 12.0, "year": 2022}, {"name": "RX 6500 XT", "vram": "4", "tdp": 107.0, "price": 9500, "perf": 14.0, "year": 2022}, {"name": "RX 6600", "vram": "8", "tdp": 132.0, "price": 14000, "perf": 26.0, "year": 2022}, {"name": "RX 6600 XT", "vram": "8", "tdp": 160.0, "price": 19000, "perf": 32.0, "year": 2021}, {"name": "RX 6650 XT", "vram": "8", "tdp": 180.0, "price": 20000, "perf": 34.0, "year": 2022}, {"name": "RX 6700 XT", "vram": "12", "tdp": 230.0, "price": 26000, "perf": 40.0, "year": 2021}, {"name": "RX 6750 XT", "vram": "12", "tdp": 250.0, "price": 30000, "perf": 44.0, "year": 2022}, {"name": "RX 6800", "vram": "16", "tdp": 250.0, "price": 35000, "perf": 50.0, "year": 2020}, {"name": "RX 6800 XT", "vram": "16", "tdp": 300.0, "price": 45000, "perf": 58.0, "year": 2020}, {"name": "RX 6900 XT", "vram": "16", "tdp": 300.0, "price": 55000, "perf": 63.0, "year": 2020}, {"name": "RX 6950 XT", "vram": "16", "tdp": 330.0, "price": 60000, "perf": 66.0, "year": 2022}, {"name": "RX 7600", "vram": "8", "tdp": 165.0, "price": 22000, "perf": 37.0, "year": 2023}, {"name": "RX 7600 XT", "vram": "16", "tdp": 190.0, "price": 27000, "perf": 42.0, "year": 2024}, {"name": "RX 7700 XT", "vram": "12", "tdp": 245.0, "price": 38000, "perf": 52.0, "year": 2023}, {"name": "RX 7800 XT", "vram": "16", "tdp": 263.0, "price": 45000, "perf": 60.0, "year": 2023}, {"name": "RX 7900 GRE", "vram": "16", "tdp": 260.0, "price": 55000, "perf": 70.0, "year": 2024}, {"name": "RX 7900 XT", "vram": "20", "tdp": 315.0, "price": 70000, "perf": 78.0, "year": 2022}, {"name": "RX 7900 XTX", "vram": "24", "tdp": 355.0, "price": 85000, "perf": 88.0, "year": 2022}, {"name": "RX 9060 XT 8GB", "vram": "8", "tdp": 160.0, "price": 25000, "perf": 43.0, "year": 2025}, {"name": "RX 9060 XT 16GB", "vram": "16", "tdp": 160.0, "price": 32000, "perf": 45.0, "year": 2025}, {"name": "RX 9070", "vram": "16", "tdp": 220.0, "price": 55000, "perf": 68.0, "year": 2025}, {"name": "RX 9070 XT", "vram": "16", "tdp": 304.0, "price": 65000, "perf": 78.0, "year": 2025}, {"name": "Arc A380", "vram": "6", "tdp": 75.0, "price": 8000, "perf": 9.0, "year": 2022}, {"name": "Arc A580", "vram": "8", "tdp": 175.0, "price": 13000, "perf": 22.0, "year": 2022}, {"name": "Arc A750", "vram": "8", "tdp": 225.0, "price": 15000, "perf": 27.0, "year": 2022}, {"name": "Arc A770 8GB", "vram": "8", "tdp": 225.0, "price": 18000, "perf": 31.0, "year": 2022}, {"name": "Arc A770 16GB", "vram": "16", "tdp": 225.0, "price": 22000, "perf": 32.0, "year": 2022}, {"name": "Arc B570", "vram": "10", "tdp": 150.0, "price": 18000, "perf": 30.0, "year": 2025}, {"name": "Arc B580", "vram": "12", "tdp": 190.0, "price": 24000, "perf": 38.0, "year": 2024}];
+const CPUS = [{"name": "Athlon 3000G", "cores": 2, "thr": 4, "ghz": "3.5", "sock": "AM4", "price": 3500, "perf": 6.0}, {"name": "Pentium G4560", "cores": 2, "thr": 4, "ghz": "3.5", "sock": "LGA1151", "price": 2000, "perf": 6.0}, {"name": "Pentium G6400", "cores": 2, "thr": 4, "ghz": "4.0", "sock": "LGA1200", "price": 3500, "perf": 9.0}, {"name": "Core i3-6100", "cores": 2, "thr": 4, "ghz": "3.7", "sock": "LGA1151", "price": 2500, "perf": 8.0}, {"name": "Core i3-8100", "cores": 4, "thr": 4, "ghz": "3.6", "sock": "LGA1151", "price": 4500, "perf": 13.0}, {"name": "Core i3-9100F", "cores": 4, "thr": 4, "ghz": "3.6", "sock": "LGA1151", "price": 4000, "perf": 14.0}, {"name": "Core i3-10100F", "cores": 4, "thr": 8, "ghz": "3.6", "sock": "LGA1200", "price": 5000, "perf": 18.0}, {"name": "Core i3-12100F", "cores": 4, "thr": 8, "ghz": "3.3", "sock": "LGA1700", "price": 6000, "perf": 27.0}, {"name": "Core i3-13100F", "cores": 4, "thr": 8, "ghz": "3.5", "sock": "LGA1700", "price": 7500, "perf": 30.0}, {"name": "Core i3-14100F", "cores": 4, "thr": 8, "ghz": "3.5", "sock": "LGA1700", "price": 8500, "perf": 32.0}, {"name": "Core i5-7400", "cores": 4, "thr": 4, "ghz": "3.0", "sock": "LGA1151", "price": 4000, "perf": 12.0}, {"name": "Core i5-8400", "cores": 6, "thr": 6, "ghz": "2.8", "sock": "LGA1151", "price": 6000, "perf": 19.0}, {"name": "Core i5-9400F", "cores": 6, "thr": 6, "ghz": "2.9", "sock": "LGA1151", "price": 6500, "perf": 21.0}, {"name": "Core i5-10400F", "cores": 6, "thr": 12, "ghz": "2.9", "sock": "LGA1200", "price": 7000, "perf": 24.0}, {"name": "Core i5-11400F", "cores": 6, "thr": 12, "ghz": "2.6", "sock": "LGA1200", "price": 8000, "perf": 28.0}, {"name": "Core i5-12400F", "cores": 6, "thr": 12, "ghz": "2.5", "sock": "LGA1700", "price": 9500, "perf": 36.0}, {"name": "Core i5-13400F", "cores": 10, "thr": 16, "ghz": "2.5", "sock": "LGA1700", "price": 13000, "perf": 42.0}, {"name": "Core i5-14400F", "cores": 10, "thr": 16, "ghz": "2.5", "sock": "LGA1700", "price": 14000, "perf": 44.0}, {"name": "Core i5-12600KF", "cores": 10, "thr": 16, "ghz": "3.7", "sock": "LGA1700", "price": 14000, "perf": 48.0}, {"name": "Core i5-13600KF", "cores": 14, "thr": 20, "ghz": "3.5", "sock": "LGA1700", "price": 19000, "perf": 56.0}, {"name": "Core i5-14600KF", "cores": 14, "thr": 20, "ghz": "3.5", "sock": "LGA1700", "price": 21000, "perf": 59.0}, {"name": "Core i5-12400F OC", "cores": 6, "thr": 12, "ghz": "4.4", "sock": "LGA1700", "price": 9500, "perf": 40.0}, {"name": "Core i7-8700", "cores": 6, "thr": 12, "ghz": "3.2", "sock": "LGA1151", "price": 9000, "perf": 26.0}, {"name": "Core i7-9700F", "cores": 8, "thr": 8, "ghz": "3.0", "sock": "LGA1151", "price": 10000, "perf": 29.0}, {"name": "Core i7-10700F", "cores": 8, "thr": 16, "ghz": "2.9", "sock": "LGA1200", "price": 11000, "perf": 32.0}, {"name": "Core i7-11700F", "cores": 8, "thr": 16, "ghz": "2.5", "sock": "LGA1200", "price": 13000, "perf": 37.0}, {"name": "Core i7-12700F", "cores": 12, "thr": 20, "ghz": "2.1", "sock": "LGA1700", "price": 16000, "perf": 50.0}, {"name": "Core i7-13700KF", "cores": 16, "thr": 24, "ghz": "3.4", "sock": "LGA1700", "price": 25000, "perf": 64.0}, {"name": "Core i7-14700KF", "cores": 20, "thr": 28, "ghz": "3.4", "sock": "LGA1700", "price": 28000, "perf": 68.0}, {"name": "Core i9-9900K", "cores": 8, "thr": 16, "ghz": "3.6", "sock": "LGA1151", "price": 14000, "perf": 36.0}, {"name": "Core i9-10900K", "cores": 10, "thr": 20, "ghz": "3.7", "sock": "LGA1200", "price": 16000, "perf": 40.0}, {"name": "Core i9-11900K", "cores": 8, "thr": 16, "ghz": "3.5", "sock": "LGA1200", "price": 18000, "perf": 43.0}, {"name": "Core i9-12900K", "cores": 16, "thr": 24, "ghz": "3.2", "sock": "LGA1700", "price": 22000, "perf": 58.0}, {"name": "Core i9-13900K", "cores": 24, "thr": 32, "ghz": "3.0", "sock": "LGA1700", "price": 33000, "perf": 75.0}, {"name": "Core i9-14900K", "cores": 24, "thr": 32, "ghz": "3.2", "sock": "LGA1700", "price": 36000, "perf": 79.0}, {"name": "Core Ultra 5 245K", "cores": 14, "thr": 24, "ghz": "5.2", "sock": "LGA1851", "price": 22000, "perf": 60.0}, {"name": "Core Ultra 7 265K", "cores": 20, "thr": 20, "ghz": "5.5", "sock": "LGA1851", "price": 32000, "perf": 72.0}, {"name": "Core Ultra 9 285K", "cores": 24, "thr": 24, "ghz": "5.7", "sock": "LGA1851", "price": 45000, "perf": 82.0}, {"name": "Xeon E5-2670", "cores": 8, "thr": 16, "ghz": "2.6", "sock": "LGA2011", "price": 1500, "perf": 11.0}, {"name": "Xeon E5-2680v4", "cores": 14, "thr": 28, "ghz": "2.4", "sock": "LGA2011", "price": 3500, "perf": 18.0}, {"name": "Ryzen 3 1200", "cores": 4, "thr": 4, "ghz": "3.1", "sock": "AM4", "price": 2500, "perf": 9.0}, {"name": "Ryzen 3 1300X", "cores": 4, "thr": 4, "ghz": "3.5", "sock": "AM4", "price": 3000, "perf": 11.0}, {"name": "Ryzen 3 3100", "cores": 4, "thr": 8, "ghz": "3.6", "sock": "AM4", "price": 5500, "perf": 18.0}, {"name": "Ryzen 3 3200G", "cores": 4, "thr": 4, "ghz": "3.6", "sock": "AM4", "price": 4500, "perf": 10.0}, {"name": "Ryzen 3 4300G", "cores": 4, "thr": 8, "ghz": "3.8", "sock": "AM4", "price": 6000, "perf": 17.0}, {"name": "Ryzen 5 1400", "cores": 4, "thr": 8, "ghz": "3.2", "sock": "AM4", "price": 3000, "perf": 12.0}, {"name": "Ryzen 5 1500X", "cores": 4, "thr": 8, "ghz": "3.5", "sock": "AM4", "price": 3500, "perf": 13.0}, {"name": "Ryzen 5 1600", "cores": 6, "thr": 12, "ghz": "3.2", "sock": "AM4", "price": 4500, "perf": 16.0}, {"name": "Ryzen 5 2600", "cores": 6, "thr": 12, "ghz": "3.4", "sock": "AM4", "price": 5500, "perf": 19.0}, {"name": "Ryzen 5 2600X", "cores": 6, "thr": 12, "ghz": "3.6", "sock": "AM4", "price": 6000, "perf": 21.0}, {"name": "Ryzen 5 3400G", "cores": 4, "thr": 8, "ghz": "3.7", "sock": "AM4", "price": 6000, "perf": 13.0}, {"name": "Ryzen 5 3600", "cores": 6, "thr": 12, "ghz": "3.6", "sock": "AM4", "price": 8000, "perf": 26.0}, {"name": "Ryzen 5 3600X", "cores": 6, "thr": 12, "ghz": "3.8", "sock": "AM4", "price": 9000, "perf": 28.0}, {"name": "Ryzen 5 4500", "cores": 6, "thr": 12, "ghz": "3.6", "sock": "AM4", "price": 5500, "perf": 22.0}, {"name": "Ryzen 5 5500", "cores": 6, "thr": 12, "ghz": "3.6", "sock": "AM4", "price": 6500, "perf": 24.0}, {"name": "Ryzen 5 5600", "cores": 6, "thr": 12, "ghz": "3.5", "sock": "AM4", "price": 8500, "perf": 33.0}, {"name": "Ryzen 5 5600X", "cores": 6, "thr": 12, "ghz": "3.7", "sock": "AM4", "price": 10000, "perf": 36.0}, {"name": "Ryzen 5 5600G", "cores": 6, "thr": 12, "ghz": "3.9", "sock": "AM4", "price": 9000, "perf": 30.0}, {"name": "Ryzen 5 5600X3D", "cores": 6, "thr": 12, "ghz": "3.3", "sock": "AM4", "price": 14000, "perf": 40.0}, {"name": "Ryzen 5 5700X", "cores": 8, "thr": 16, "ghz": "3.4", "sock": "AM4", "price": 11000, "perf": 39.0}, {"name": "Ryzen 7 1700", "cores": 8, "thr": 16, "ghz": "3.0", "sock": "AM4", "price": 4000, "perf": 14.0}, {"name": "Ryzen 7 2700X", "cores": 8, "thr": 16, "ghz": "3.7", "sock": "AM4", "price": 6000, "perf": 20.0}, {"name": "Ryzen 7 3700X", "cores": 8, "thr": 16, "ghz": "3.6", "sock": "AM4", "price": 9000, "perf": 27.0}, {"name": "Ryzen 7 5700X3D", "cores": 8, "thr": 16, "ghz": "3.0", "sock": "AM4", "price": 18000, "perf": 48.0}, {"name": "Ryzen 7 5800X", "cores": 8, "thr": 16, "ghz": "3.8", "sock": "AM4", "price": 13000, "perf": 42.0}, {"name": "Ryzen 7 5800X3D", "cores": 8, "thr": 16, "ghz": "3.4", "sock": "AM4", "price": 19000, "perf": 50.0}, {"name": "Ryzen 7 7700", "cores": 8, "thr": 16, "ghz": "3.8", "sock": "AM5", "price": 18000, "perf": 50.0}, {"name": "Ryzen 7 7700X", "cores": 8, "thr": 16, "ghz": "4.5", "sock": "AM5", "price": 22000, "perf": 55.0}, {"name": "Ryzen 7 7800X3D", "cores": 8, "thr": 16, "ghz": "4.2", "sock": "AM5", "price": 32000, "perf": 68.0}, {"name": "Ryzen 7 9700X", "cores": 8, "thr": 16, "ghz": "3.8", "sock": "AM5", "price": 28000, "perf": 60.0}, {"name": "Ryzen 7 9800X3D", "cores": 8, "thr": 16, "ghz": "4.7", "sock": "AM5", "price": 45000, "perf": 75.0}, {"name": "Ryzen 9 3900X", "cores": 12, "thr": 24, "ghz": "3.8", "sock": "AM4", "price": 14000, "perf": 32.0}, {"name": "Ryzen 9 5900X", "cores": 12, "thr": 24, "ghz": "3.7", "sock": "AM4", "price": 20000, "perf": 48.0}, {"name": "Ryzen 9 5950X", "cores": 16, "thr": 32, "ghz": "3.4", "sock": "AM4", "price": 25000, "perf": 52.0}, {"name": "Ryzen 9 7900X", "cores": 12, "thr": 24, "ghz": "4.7", "sock": "AM5", "price": 30000, "perf": 62.0}, {"name": "Ryzen 9 7900X3D", "cores": 12, "thr": 24, "ghz": "4.4", "sock": "AM5", "price": 38000, "perf": 68.0}, {"name": "Ryzen 9 7950X3D", "cores": 16, "thr": 32, "ghz": "4.2", "sock": "AM5", "price": 55000, "perf": 78.0}, {"name": "Ryzen 9 7950X", "cores": 16, "thr": 32, "ghz": "4.5", "sock": "AM5", "price": 45000, "perf": 74.0}, {"name": "Ryzen 9 9900X", "cores": 12, "thr": 24, "ghz": "4.4", "sock": "AM5", "price": 38000, "perf": 68.0}, {"name": "Ryzen 9 9950X", "cores": 16, "thr": 32, "ghz": "4.3", "sock": "AM5", "price": 50000, "perf": 80.0}, {"name": "Ryzen 9 9950X3D", "cores": 16, "thr": 32, "ghz": "4.3", "sock": "AM5", "price": 65000, "perf": 85.0}];
+const GAMES = [{"name": "CS2", "k": 6.0, "cpuNeed": 95.0, "profs": ["Ультра", "Средние", "Минимальные"]}, {"name": "Dota 2", "k": 4.5, "cpuNeed": 120.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "Valorant", "k": 7.0, "cpuNeed": 140.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "Fortnite", "k": 2.2, "cpuNeed": 75.0, "profs": ["Эпик", "Высокие", "Производительность"]}, {"name": "Cyberpunk 2077", "k": 1.05, "cpuNeed": 45.0, "profs": ["Ультра RT", "Высокие", "Средние"]}, {"name": "GTA V", "k": 2.6, "cpuNeed": 85.0, "profs": ["Ультра", "Высокие", "Обычные"]}, {"name": "Warzone", "k": 1.8, "cpuNeed": 60.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "PUBG", "k": 2.2, "cpuNeed": 70.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "Apex Legends", "k": 3.2, "cpuNeed": 80.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "Minecraft", "k": 10.0, "cpuNeed": 400.0, "profs": ["Шейдеры", "Высокие", "Быстрая"]}, {"name": "The Witcher 3", "k": 1.9, "cpuNeed": 60.0, "profs": ["Ультра+RT", "Высокие", "Средние"]}, {"name": "Red Dead Redemption 2", "k": 1.1, "cpuNeed": 45.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "EA FC 25", "k": 2.4, "cpuNeed": 75.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "World of Tanks", "k": 5.5, "cpuNeed": 110.0, "profs": ["Макс", "Высокие", "Средние"]}, {"name": "Rust", "k": 1.5, "cpuNeed": 50.0, "profs": ["Ультра", "Высокие", "Средние"]}, {"name": "War Thunder", "k": 4.0, "cpuNeed": 90.0, "profs": ["Макс", "Высокие", "Средние"]}];
+const BUILDS = [["Стартовая офисно-игровая", 35000, "RX 6600", "Core i3-12100F", "16 ГБ DDR4-3200", "512 ГБ NVMe", "B660M", "550 Вт Bronze"], ["Бюджетный гейминг 1080p", 55000, "RX 7600", "Ryzen 5 5600", "16 ГБ DDR4-3200", "1 ТБ NVMe", "B550", "600 Вт Bronze"], ["Золотая середина 1440p", 90000, "RX 7700 XT", "Ryzen 7 5700X", "32 ГБ DDR4-3600", "1 ТБ NVMe", "B550", "750 Вт Gold"], ["Мощная 1440p / начальная 4K", 140000, "RTX 5070 Ti", "Ryzen 7 7700", "32 ГБ DDR5-6000", "2 ТБ NVMe", "B650", "850 Вт Gold"], ["Топ 4K без компромиссов", 300000, "RTX 5080", "Ryzen 7 9800X3D", "64 ГБ DDR5-6000", "4 ТБ NVMe", "X870", "1000 Вт Gold"]];
+const RES = [["1280x720 (HD)", 1.45], ["1920x1080 (Full HD)", 1.0], ["2560x1440 (2K)", 0.62], ["3840x2160 (4K)", 0.38]];
+const RAM = [["8 ГБ DDR4-2133", 0.8], ["8 ГБ DDR4-2666", 0.88], ["16 ГБ DDR4-3200", 1.0], ["16 ГБ DDR5-5600", 1.05], ["32 ГБ DDR4-3600", 1.03], ["32 ГБ DDR5-6000", 1.09], ["64 ГБ DDR5-6000", 1.12]];
+const SECTIONS = [["#calc","Калькулятор"],["#gpu-db","Видеокарты"],["#cpu-db","Процессоры"],["#ram","Память"],["#storage","Накопители"],["#psu","Блок питания"],["#mb","Матплаты"],["#cooling","Охлаждение"],["#case","Корпус"],["#monitors","Мониторы"],["#builds","Сборки"],["#tips","Сборка ПК"],["#faq","FAQ"],["#glossary","Глоссарий"]];
+const nav = document.getElementById('nav');
+nav.innerHTML = SECTIONS.map(s=>'<a href="'+s[0]+'">'+s[1]+'</a>').join('');
+
+const gpuSel = document.getElementById('gpu'), cpuSel = document.getElementById('cpu');
+const ramSel = document.getElementById('ram'), resSel = document.getElementById('res');
+const pgpuSel = document.getElementById('pgpu'), pcpuSel = document.getElementById('pcpu');
+GPUS.forEach((g,i)=>{gpuSel.add(new Option(g.name+" ("+g.price+" ₽)", i));pgpuSel.add(new Option(g.name, i));});
+CPUS.forEach((c,i)=>{cpuSel.add(new Option(c.name+" ("+c.price+" ₽)", i));pcpuSel.add(new Option(c.name, i));});
+RAM.forEach((r,i)=>ramSel.add(new Option(r[0], i)));
+RES.forEach((r,i)=>resSel.add(new Option(r[0], i)));
+gpuSel.value = GPUS.findIndex(g=>g.name==="RX 5700 XT");
+if(gpuSel.value<0) gpuSel.value = 0;
+
+function cpuFactor(c){ return Math.max(0.35, Math.min(1.1, 0.4 + 0.6*c.perf/60)); }
+function calcFps(g, c, r, res, k, cpuNeed){
+  const gpuFps = k * g.perf * cpuFactor(c) * r[1] * res[1];
+  const cpuCap = k * c.perf * 0.55 * cpuFactor(c) * r[1] * cpuNeed/60;
+  return Math.min(gpuFps, cpuCap);
+}
+function verdict(g, c){
+  if (g.perf > c.perf*2.4) return "⚠️ Процессор "+c.name+" сдерживает видеокарту "+g.name+". В играх вы теряете FPS — имеет смысл обновить CPU (или снизить ожидания).";
+  if (c.perf > g.perf*1.9) return "⚠️ Видеокарта "+g.name+" слабее процессора — в тяжёлых играх лимитирует GPU. Вкладывайтесь в видеокарту.";
+  return "✅ Связка "+g.name+" + "+c.name+" сбалансирована: ни один компонент сильно не душит другой.";
+}
+function renderCalc(){
+  const g = GPUS[+gpuSel.value], c = CPUS[+cpuSel.value], r = RAM[+ramSel.value], res = RES[+resSel.value];
+  document.getElementById('hwinfo').textContent = g.name+" + "+c.name+" · "+r[0]+" · "+res[0];
+  const v = document.getElementById('verdict'); v.style.display='block'; v.textContent = verdict(g,c);
+  const box = document.getElementById('games'); box.innerHTML='';
+  const profMult = [1.25, 1.0, 0.72];
+  GAMES.forEach(game=>{
+    const f0 = calcFps(g,c,r,res,game.k,game.cpuNeed)*profMult[0];
+    const f1 = calcFps(g,c,r,res,game.k,game.cpuNeed)*profMult[1];
+    const f2 = calcFps(g,c,r,res,game.k,game.cpuNeed)*profMult[2];
+    let best = 0;
+    if (f2 >= 60) best = 2; else if (f1 >= 60) best = 1; else best = 0;
+    const el = document.createElement('div'); el.className='card';
+    el.innerHTML = '<h3>'+game.name+'</h3>' +
+      [0,1,2].map(i=>{
+        const f = [f0,f1,f2][i];
+        return '<div class="fpsrow'+(i===best?' best':'')+'"><span>'+game.profs[i]+(i===best?'<span class="tag">рекомендую</span>':'')+'</span><b>~'+Math.round(f)+' FPS</b></div>';
+      }).join('');
+    box.appendChild(el);
+  });
+}
+[gpuSel,cpuSel,ramSel,resSel].forEach(s=>s.addEventListener('change', renderCalc));
+renderCalc();
+
+function calcPsu(){
+  const g = GPUS[+pgpuSel.value], c = CPUS[+pcpuSel.value];
+  const need = g.tdp + c.cores*6 + 90;
+  const rec = Math.ceil(need*1.3/50)*50;
+  const cert = rec<=600?"Bronze/Budget":rec<=750?"Bronze/Gold":"Gold и выше";
+  document.getElementById('psures').innerHTML = '<p>Расчётное потребление системы: <b>~'+Math.round(need)+' Вт</b></p><p class="big">Рекомендуемый БП: '+rec+' Вт</p><p>Сертификат: '+cert+'. Берите с запасом по мощности — так тише и холоднее, и хватит на апгрейд.</p>';
+}
+calcPsu();
+
+function sortTable(rows, key, dir){
+  return rows.sort((a,b)=>{
+    const x=a[key], y=b[key];
+    return (typeof x==='number' ? (x-y)*dir : String(x).localeCompare(String(y),'ru'))*dir;
+  });
+}
+let gdir=1, cdir=1, gkey='perf', ckey='perf';
+function renderGpu(){
+  const q = document.getElementById('gpuq').value.toLowerCase();
+  let rows = GPUS.filter(g=>g.name.toLowerCase().includes(q)||String(g.price).includes(q));
+  rows = sortTable([...rows], gkey, gdir);
+  const t = document.getElementById('gput');
+  const cols = [["name","Модель"],["vram","VRAM, ГБ"],["tdp","TDP, Вт"],["price","Цена, ₽"],["year","Год"]];
+  t.innerHTML = '<tr>'+cols.map(c=>'<th data-k="'+c[0]+'">'+c[1]+(gkey===c[0]?(gdir>0?' ▲':' ▼'):'')+'</th>').join('')+'<th>Производительность</th></tr>'
+    + rows.map(g=>'<tr><td>'+g.name+'</td><td>'+g.vram+'</td><td>'+g.tdp+'</td><td class="price">'+g.price+'</td><td>'+g.year+'</td><td>'+'█'.repeat(Math.max(1,Math.round(g.perf/6)))+'</td></tr>').join('');
+  t.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{
+    if(gkey===th.dataset.k) gdir*=-1; else {gkey=th.dataset.k; gdir=1;}
+    renderGpu();
+  }));
+}
+renderGpu();
+document.getElementById('gpuq').addEventListener('input', renderGpu);
+
+function renderCpu(){
+  const q = document.getElementById('cpuq').value.toLowerCase();
+  let rows = CPUS.filter(c=>c.name.toLowerCase().includes(q)||String(c.price).includes(q));
+  rows = sortTable([...rows], ckey, cdir);
+  const t = document.getElementById('cput');
+  const cols = [["name","Модель"],["cores","Ядра"],["thr","Потоки"],["ghz","Частота, ГГц"],["sock","Сокет"],["price","Цена, ₽"]];
+  t.innerHTML = '<tr>'+cols.map(c=>'<th data-k="'+c[0]+'">'+c[1]+(ckey===c[0]?(cdir>0?' ▲':' ▼'):'')+'</th>').join('')+'<th>Производительность</th></tr>'
+    + rows.map(c=>'<tr><td>'+c.name+'</td><td>'+c.cores+'</td><td>'+c.thr+'</td><td>'+c.ghz+'</td><td>'+c.sock+'</td><td class="price">'+c.price+'</td><td>'+'█'.repeat(Math.max(1,Math.round(c.perf/4)))+'</td></tr>').join('');
+  t.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{
+    if(ckey===th.dataset.k) cdir*=-1; else {ckey=th.dataset.k; cdir=1;}
+    renderCpu();
+  }));
+}
+renderCpu();
+document.getElementById('cpuq').addEventListener('input', renderCpu);
+
+function renderBuilds(){
+  const box = document.getElementById('buildlist');
+  BUILDS.forEach((b,idx)=>{
+    const el = document.createElement('div'); el.className='card';
+    el.innerHTML = '<h3>'+b[0]+' — ~'+b[1].toLocaleString('ru')+' ₽</h3>'
+      + '<p><span class="badge">GPU: '+b[2]+'</span><span class="badge">CPU: '+b[3]+'</span><span class="badge">ОЗУ: '+b[4]+'</span><span class="badge">SSD: '+b[5]+'</span><span class="badge">Плата: '+b[6]+'</span><span class="badge">БП: '+b[7]+'</span></p>'
+      + '<button onclick="applyBuild('+idx+')">Показать FPS этой сборки</button>';
+    box.appendChild(el);
+  });
+}
+function applyBuild(i){
+  const b = BUILDS[i];
+  const gi = GPUS.findIndex(g=>g.name===b[2]); if(gi>=0) gpuSel.value=gi;
+  const ci = CPUS.findIndex(c=>c.name===b[3]); if(ci>=0) cpuSel.value=ci;
+  const ri = RAM.findIndex(r=>r[0]===b[4]); if(ri>=0) ramSel.value=ri;
+  renderCalc();
+  document.getElementById('calc').scrollIntoView({behavior:'smooth'});
+}
+renderBuilds();
+</script>
+</body>
+</html>
